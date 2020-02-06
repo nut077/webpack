@@ -1,11 +1,31 @@
 const path = require('path');
 const webpack = require('webpack');
+const context = path.resolve(__dirname, 'src');
+
+const cssModuleRules = [
+  'style-loader',
+  {
+    loader: 'css-loader',
+    options: {
+      modules: {
+        localIdentName: '[path][name]__[local]--[hash:base64:5]'
+      },
+      sourceMap: true
+    }
+  },
+  {
+    loader: 'postcss-loader',
+    options: {
+      sourceMap: true
+    }
+  }
+];
 
 module.exports = {
   devtool: 'eval-source-map',
-  context: path.resolve(__dirname, 'src'),
+  context,
   entry: {
-    app: ['./index']
+    app: ['normalize.css', './index']
   },
   output: {
     path: path.resolve(__dirname, './dist'),
@@ -14,7 +34,7 @@ module.exports = {
   resolve: {
     alias: {
       'react-dom': '@hot-loader/react-dom',
-      Containers: './containers'
+      Containers: path.resolve(context, 'containers')
     }
   },
   module: {
@@ -26,25 +46,11 @@ module.exports = {
         loader: 'eslint-loader'
       },
       { test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader' },
+      { test: /\.css$/, use: cssModuleRules },
       {
         test: /\.scss$/,
         use: [
-          'style-loader',
-          {
-            loader: 'css-loader',
-            options: {
-              modules: {
-                localIdentName: '[path][name]__[local]--[hash:base64:5]'
-              },
-              sourceMap: true
-            }
-          },
-          {
-            loader: 'postcss-loader',
-            options: {
-              sourceMap: true
-            }
-          },
+          ...cssModuleRules,
           {
             loader: 'sass-loader',
             options: {
